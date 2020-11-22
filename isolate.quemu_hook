@@ -1,0 +1,13 @@
+#!/bin/sh
+LOG="/var/log/libvirt_qemu_hook.log"
+VM1NAME="w10test"
+VM1ISOL="8-15"
+
+if [[ $1 == $VM1NAME ]] && [[ $2 == "prepare" ]]; then
+  echo "VM $VM1NAME preparing" >> $LOG
+  cset shield -c $VM1ISOL >> $LOG
+fi
+if [[ $1 == $VM1NAME ]] && [[ $2 == "stopped" ]]; then
+  echo "VM $VM1NAME stopped" >> $LOG
+  cset shield --reset >> $LOG
+fi
