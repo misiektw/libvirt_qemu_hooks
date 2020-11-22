@@ -1,0 +1,21 @@
+#!/bin/sh
+LOG="/var/log/libvirt_qemu_hook.log"
+VM1NAME="w10test"
+
+if [[ $1 == $VM1NAME ]] && [[ $2 == "started" ]]; then
+  echo "VM $VM1NAME started" >> $LOG
+  #Finds main PID of qemu
+  for CPID in $(pidof qemu-system-x86_64);do
+	MPID=$(pstree -pa $CPID | grep $VM1NAME | awk -F',' '{print $2}' | awk '{print $1}')
+	if [ -n "$MPID" ];then echo "Found $VM1NAME pid $MPID" >> $LOG; break; fi
+  done
+  #Loops over all qemu threads
+  for CPID in $(pstree -pa $MPID | cut -d',' -f2 | cut -d' ' -f1); do
+	#log affinity for pids
+     taskset -pc $CPID >> $LOG
+  done
+
+fi
+if [[ $1 == $VM1NAME ]] && [[ $2 == "stopped" ]]; then
+  echo "VM $VM1NAME stopped" >> $LOG
+fi
